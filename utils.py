@@ -18,6 +18,7 @@ Mostly copy-paste from torchvision references or other public repos like DETR:
 https://github.com/facebookresearch/detr/blob/master/util/misc.py
 """
 import os
+import wandb
 import sys
 import time
 import math
@@ -392,6 +393,7 @@ class MetricLogger(object):
                         i, len(iterable), eta=eta_string,
                         meters=str(self),
                         time=str(iter_time), data=str(data_time)))
+            wandb.log({k: v.median for k, v in self.meters.items()})
             i += 1
             end = time.time()
         total_time = time.time() - start_time
