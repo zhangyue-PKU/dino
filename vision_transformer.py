@@ -84,7 +84,7 @@ class Attention(nn.Module):
 
         attn = (q @ k.transpose(-2, -1)) * self.scale
         attn = attn.softmax(dim=-1)
-        attn = self.attn_drop(attn)
+        attn = self.attn_drop(attn) # b, heads, n, n
 
         x = (attn @ v).transpose(1, 2).reshape(B, N, C)
         x = self.proj(x)
@@ -256,6 +256,7 @@ def vit_base(patch_size=16, **kwargs):
 
 class DINOHead(nn.Module):
     def __init__(self, in_dim, out_dim, use_bn=False, norm_last_layer=True, nlayers=3, hidden_dim=2048, bottleneck_dim=256):
+        # three layer mlp followed by l2 norm and weight normalized fc
         super().__init__()
         nlayers = max(nlayers, 1)
         if nlayers == 1:
@@ -264,7 +265,7 @@ class DINOHead(nn.Module):
             layers = [nn.Linear(in_dim, hidden_dim)]
             if use_bn:
                 layers.append(nn.BatchNorm1d(hidden_dim))
-            layers.append(nn.GELU())
+            layers.append(nn.GELU()) # fc, norm, gelu
             for _ in range(nlayers - 2):
                 layers.append(nn.Linear(hidden_dim, hidden_dim))
                 if use_bn:
